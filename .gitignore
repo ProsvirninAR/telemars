@@ -1,0 +1,16 @@
+.dev/
+
+.env
+
+__pycache__/
+*.pyc
+
+.DS_Store
+
+*.log
+
+*.xlsx
+*.csv
+*.txt
+
+settings.json

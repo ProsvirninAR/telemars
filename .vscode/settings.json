@@ -1,0 +1,20 @@
+{
+    "editor.rulers": [
+        120
+    ],
+    "workbench.editor.enablePreview": false,
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+    },
+    "editor.fontFamily": "JetBrains Mono",
+    "editor.fontLigatures": true,
+    "editor.fontWeight": "normal",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}
