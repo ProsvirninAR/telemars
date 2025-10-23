@@ -12,7 +12,7 @@ from typing_extensions import Annotated, Optional, Self, Sequence
 from telemars.filters import crosstab as cflt
 from telemars.options.crosstab import Option
 from telemars.params.filters.crosstab import RegionId
-from telemars.params.options.crosstab import KitId, SortOrder
+from telemars.params.options.crosstab import IssueType, KitId, SortOrder
 from telemars.params.slices.crosstab import Slice
 from telemars.params.statistics.crosstab import K7Statistic
 
@@ -161,8 +161,8 @@ class CrosstabTask(BaseModel):
                     )
                 )
 
-        # При расчете задачи по BREAKS недопустимы следующие фильтры: "adIssueStatusId"
-        if self.options.issue_type:
+        # При расчете задачи по BREAKS недопустимы следующие фильтры: "adIssueStatusId".
+        if self.options.issue_type == IssueType.BREAKS:
             if self.ad_filter.ad_issue_status_id is not None:
                 raise ValueError('При расчете задачи по BREAKS недопустим фильтр adFilter.adIssueStatusId.')
 
