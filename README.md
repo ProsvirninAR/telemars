@@ -30,6 +30,78 @@ pip install telemars
 
 **Внимание:** Не забудьте добавить `settings.json` в `.gitignore`, чтобы не допустить утечки конфиденциальных данных.
 
+## Пример использования
+
+```python
+import asyncio
+from datetime import date
+from pprint import pprint
+
+import polars as pl
+
+from telemars.filters import crosstab as filter
+from telemars.options.crosstab import Option
+from telemars.params.filters import crosstab as cflt
+from telemars.params.options import crosstab as cops
+from telemars.params.slices.crosstab import Slice
+from telemars.params.statistics.crosstab import K7Statistic as Statistic
+from telemars.tasks.crosstab import CrosstabTask
+
+
+async def main() -> pl.DataFrame:
+    ct = CrosstabTask(
+        date_filter=filter.DateFilter(
+            date_from=(date(2025, 1, 1)),
+            date_to=date(2025, 1, 31),
+        ),
+        basedemo_filter=[
+            filter.BaseDemoFilter(sex=cflt.Sex.FEMALE, age=(18, 99)),
+        ],
+        break_filter=filter.BreakFilter(
+            breaks_content_type=[cflt.BreaksContentType.COMMERCIAL],
+            breaks_issue_status_id=[cflt.BreaksIssueStatusId.REAL],
+            breaks_distribution_type=[
+                cflt.BreaksDistributionType.NETWORK,
+                cflt.BreaksDistributionType.ORBITAL,
+            ],
+        ),
+        platform_filter=filter.PlatformFilter(
+            platform_id=[
+                cflt.Platform.TV,
+                cflt.Platform.DESKTOP,
+                cflt.Platform.MOBILE,
+            ],
+        ),
+        playbacktype_filter=filter.PlayBackTypeFilter(
+            playback_type_id=[p for p in cflt.PlayBackType],
+        ),
+        slices=[
+            Slice.BREAKS_DISTRIBUTION_TYPE_NAME,
+            Slice.TV_COMPANY_NAME,
+        ],
+        options=Option(
+            kit_id=cops.KitId.BIG_TV,
+            big_tv=cops.BigTv.YES,
+            issue_type=cops.IssueType.BREAKS,
+        ),
+        sortings=[
+            (Slice.BREAKS_DISTRIBUTION_TYPE_NAME, cops.SortOrder.DESC),
+            (Slice.TV_COMPANY_NAME, cops.SortOrder.ASC),
+        ],
+        statistics=[
+            Statistic.RTG_PER_AVG,
+        ],
+    )
+
+    result: pl.DataFrame = await ct.execute()
+
+    pprint(result)
+
+
+if __name__ == '__main__':
+    asyncio.run(main())
+```
+
 ## Контрибьюция
 
 Предложения по улучшению и доработке проекта приветствуются. Если вы обнаружили проблему или у вас есть идеи по
