@@ -1,6 +1,7 @@
 from enum import Enum
 
 
+# TODO: Добавить недостающие комментарии к статистикам.
 class K7Statistic(Enum):
     """Статистики отчета Simple набора данных "Big TV" и "Внедомашний просмотр"."""
 
@@ -9,13 +10,19 @@ class K7Statistic(Enum):
     REACH_PER = 'ReachPer'  # Зависит от ЦА.
     SPOT_BY_BREAKS_REACH_PER = 'SpotByBreaksReachPer'  # Зависит от ЦА.
     RTG000 = 'Rtg000'  # Зависит от ЦА.
+    SALES_RTG000 = 'SalesRtg000'
     SPOT_BY_BREAKS_RTG000 = 'SpotByBreaksRtg000'  # Зависит от ЦА.
     SPOT_BY_BREAKS_SALES_RTG000 = 'SpotByBreaksSalesRtg000'  # Не зависит от ЦА.
     RTG_PER = 'RtgPer'  # Зависит от ЦА.
+    STAND_RTG_PER = 'StandRtgPer'
+    SALES_RTG_PER = 'SalesRtgPer'
+    STAND_SALES_RTG_PER = 'StandSalesRtgPer'
     SPOT_BY_BREAKS_RTG_PER = 'SpotByBreaksRtgPer'  # Зависит от ЦА.
     SPOT_BY_BREAKS_STAND_RTG_PER = 'SpotByBreaksStandRtgPer'  # Зависит от ЦА.
     SPOT_BY_BREAKS_SALES_RTG_PER = 'SpotByBreaksSalesRtgPer'  # Не зависит от ЦА.
     SPOT_BY_BREAKS_STAND_SALES_RTG_PER = 'SpotByBreaksStandSalesRtgPer'  # Не зависит от ЦА.
+    ATV = 'ATV'
+    ATV_REACH = 'ATVReach'
     UNIVERSE000 = 'Universe000'  # Зависит от ЦА.
     SAMPLE = 'Sample'  # Зависит от ЦА.
     DURATION = 'Duration'  # Не зависит от ЦА.
