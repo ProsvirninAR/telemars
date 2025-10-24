@@ -1,7 +1,6 @@
 from enum import Enum
 
 
-# TODO: Добавить недостающие комментарии к статистикам.
 class K7Statistic(Enum):
     """Статистики отчета Crosstab набора данных "Big TV" и "Внедомашний просмотр"."""
 
