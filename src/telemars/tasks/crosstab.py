@@ -6,8 +6,8 @@ import polars as pl
 from mediascope_api.core import net as mscore
 from mediascope_api.mediavortex import catalogs as cwc
 from mediascope_api.mediavortex import tasks as cwt
-from pydantic import BaseModel, ConfigDict, Field, model_validator
-from typing_extensions import Annotated, Optional, Self, Sequence
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
+from typing_extensions import Annotated, Optional, Self, Sequence, Union
 
 from telemars.filters import crosstab as cflt
 from telemars.options.crosstab import Option
@@ -44,7 +44,7 @@ class CrosstabTask(BaseModel):
     ]
     # Целевые аудитории указываются исключительно в BaseDemoFilter.
     basedemo_filter: Annotated[
-        Sequence[cflt.BaseDemoFilter],
+        Union[cflt.BaseDemoFilter, Sequence[cflt.BaseDemoFilter]],
         Field(min_length=1),
     ]
     targetdemo_filter: Annotated[
@@ -103,6 +103,17 @@ class CrosstabTask(BaseModel):
         cwc.MediaVortexCats,
         Field(default_factory=cwc.MediaVortexCats),
     ]
+
+    @field_validator('basedemo_filter', mode='before')
+    @classmethod
+    def validate_basedemo_filter(
+        cls, v: Union[cflt.BaseDemoFilter, Sequence[cflt.BaseDemoFilter]], info: ValidationInfo
+    ) -> Sequence[cflt.BaseDemoFilter]:
+        """Преобразует одиночный BaseDemoFilter в список из одного элемента."""
+        if isinstance(v, cflt.BaseDemoFilter):
+            return [v]
+
+        return v
 
     @model_validator(mode='after')
     def check_dates(self) -> Self:

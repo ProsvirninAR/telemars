@@ -6,10 +6,9 @@ import polars as pl
 from mediascope_api.core import net as mscore
 from mediascope_api.mediavortex import catalogs as cwc
 from mediascope_api.mediavortex import tasks as cwt
-from pydantic import BaseModel, ConfigDict, Field, model_validator
-from typing_extensions import Annotated, Optional, Self, Sequence
+from pydantic import BaseModel, ConfigDict, Field, ValidationInfo, field_validator, model_validator
+from typing_extensions import Annotated, Optional, Self, Sequence, Union
 
-from telemars.filters import general as gflt
 from telemars.filters import simple as sflt
 from telemars.options.simple import Option
 from telemars.params.filters.simple import RegionId
@@ -24,33 +23,33 @@ class SimpleTask(BaseModel):
 
     # Перечень фильтров расчета.
     date_filter: Annotated[
-        gflt.DateFilter,
+        sflt.DateFilter,
         Field(...),
     ]
     weekday_filter: Annotated[
-        gflt.WeekdayFilter,
-        Field(default_factory=gflt.WeekdayFilter),
+        sflt.WeekdayFilter,
+        Field(default_factory=sflt.WeekdayFilter),
     ]
     daytype_filter: Annotated[
-        gflt.DaytypeFilter,
-        Field(default_factory=gflt.DaytypeFilter),
+        sflt.DaytypeFilter,
+        Field(default_factory=sflt.DaytypeFilter),
     ]
     company_filter: Annotated[
-        gflt.CompanyFilter,
-        Field(default_factory=gflt.CompanyFilter),
+        sflt.CompanyFilter,
+        Field(default_factory=sflt.CompanyFilter),
     ]
     location_filter: Annotated[
-        gflt.LocationFilter,
-        Field(default_factory=gflt.LocationFilter),
+        sflt.LocationFilter,
+        Field(default_factory=sflt.LocationFilter),
     ]
     # Целевые аудитории указываются исключительно в BaseDemoFilter.
     basedemo_filter: Annotated[
-        Sequence[gflt.BaseDemoFilter],
+        Union[sflt.BaseDemoFilter, Sequence[sflt.BaseDemoFilter]],
         Field(min_length=1),
     ]
     targetdemo_filter: Annotated[
-        gflt.TargetDemoFilter,
-        Field(default_factory=gflt.TargetDemoFilter),
+        sflt.TargetDemoFilter,
+        Field(default_factory=sflt.TargetDemoFilter),
     ]
     program_filter: Annotated[
         sflt.ProgramFilter,
@@ -104,6 +103,17 @@ class SimpleTask(BaseModel):
         cwc.MediaVortexCats,
         Field(default_factory=cwc.MediaVortexCats),
     ]
+
+    @field_validator('basedemo_filter', mode='before')
+    @classmethod
+    def validate_basedemo_filter(
+        cls, v: Union[sflt.BaseDemoFilter, Sequence[sflt.BaseDemoFilter]], info: ValidationInfo
+    ) -> Sequence[sflt.BaseDemoFilter]:
+        """Преобразует одиночный BaseDemoFilter в список из одного элемента."""
+        if isinstance(v, sflt.BaseDemoFilter):
+            return [v]
+
+        return v
 
     @model_validator(mode='after')
     def check_dates(self) -> Self:
@@ -228,14 +238,14 @@ class SimpleTask(BaseModel):
         return self
 
     def _build_task(
-        self, basedemo_filter: gflt.BaseDemoFilter, statistic: K7Statistic, region_id: Optional[int] = None
+        self, basedemo_filter: sflt.BaseDemoFilter, statistic: K7Statistic, region_id: Optional[int] = None
     ) -> str:
         """Генерирует задание для отчета Simple в формате JSON для конкретной аудитории и статистики."""
         # NOTE: Для каждого региона (города) необходимо переопределять фильтр.
         company_filter_expr: str | None = self.company_filter.expr
 
         if region_id is not None:
-            company_filter_copy: gflt.CompanyFilter = self.company_filter.model_copy(deep=True)
+            company_filter_copy: sflt.CompanyFilter = self.company_filter.model_copy(deep=True)
             company_filter_copy.region_id = [region_id]
             company_filter_expr = company_filter_copy.expr
 
@@ -274,7 +284,7 @@ class SimpleTask(BaseModel):
         @dataclass
         class TaskInfo:
             region_id: Optional[int]
-            basedemo_filter: gflt.BaseDemoFilter
+            basedemo_filter: sflt.BaseDemoFilter
             statistic: K7Statistic
 
         tasks: list[dict] = []
