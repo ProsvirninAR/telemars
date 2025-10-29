@@ -194,6 +194,17 @@ class CrosstabTask(BaseModel):
         if self.options.kit_id != KitId.BIG_TV:
             raise ValueError('В данный момент KitID {} не поддерживается в отчете Crosstab.'.format(KitId.BIG_TV.value))
 
+        if self.options.issue_type in (IssueType.BREAKS, IssueType.PROGRAM):
+            for statistic in self.statistics:
+                if statistic in [
+                    K7Statistic.CONSOLIDATED_COST_SUM_RUB,
+                    K7Statistic.CONSOLIDATED_COST_SUM_USD,
+                    K7Statistic.STAND_RTG_PER_SUM,
+                ]:
+                    raise ValueError(
+                        'Статистика {} недоступна для расчета по BREAKS и PROGRAM.'.format(statistic.value)
+                    )
+
         return self
 
     def _build_task(
